@@ -1,20 +1,14 @@
 package com.agrostar.test.assignment;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
+
+import junit.framework.Assert;
+
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
-import com.google.gson.Gson;
+
 import io.restassured.RestAssured;
-import io.restassured.mapper.resolver.ObjectMapperResolver;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 
@@ -70,33 +64,10 @@ public class ThirdTest {
 	public void deleteRequest(){
 		RestAssured.given()
 		.contentType("application/json")
-		.delete("/"+idContext+"");		
-	}
-	
-	//@Test
-	public void validateResponseOfGet(){
-		
-		Response mapJsonData = RestAssured.get(END_POINT);
-		mapJsonData(mapJsonData.asString(),ResponseData.class);		
-		JsonPath jsonEvaludator = RestAssured.get(END_POINT).jsonPath();
-		
-		List<ResponseData> reponse = getResponseContent(jsonEvaludator, "$.");
-		
-		for(ResponseData resp: reponse){
-			if(true){
-				
-			}
-		}
-	}
-	
-	public <T> void mapJsonData(String reponse, Class<T> T){
-		Gson gson = new Gson();
-		gson.toJson(reponse, T);
-		
-	}
-	
-	public List<ResponseData> getResponseContent(JsonPath jsonEvaludator, String jsonPathExpression){
-		return 	jsonEvaludator.getList(jsonPathExpression, ResponseData.class);
+		.delete("/"+idContext+"")
+		.then()
+		.assertThat()
+		.statusCode(ThirdTest.OK_STATUS_CODE);
 	}
 	
 	public  RequestSpecification givenPostRequest(String endpoint, JSONObject body){				
@@ -108,6 +79,25 @@ public class ThirdTest {
 	public  ValidatableResponse givenGetRequest(){		
 		return RestAssured.get().then().log().everything();	
 	}
+	
+	@Test(description="Validate response body content and id for integer value")
+	public void validateResponseOfGet(){
+		List<ResponseData> responseMap = 
+				RestAssured
+				.given()
+				.contentType("application/json")
+				.get()
+				.getBody()
+				.jsonPath()
+				.getList("$.",ResponseData.class);		
+			
+		for(ResponseData element: responseMap){
+			String strMsg = String.format("Id of userId %d is not integer", element.getUserId());
+			Assert.assertTrue(strMsg, element.getId() > 0);		
+		}
+	}	
+	
+	
 	
 	/**
 	 * Post request body
