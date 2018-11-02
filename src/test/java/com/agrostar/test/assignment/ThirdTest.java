@@ -80,6 +80,9 @@ public class ThirdTest {
 		return RestAssured.get().then().log().everything();	
 	}
 	
+	/**
+	 * Validate response body content and id for integer value
+	 */	
 	@Test(description="Validate response body content and id for integer value")
 	public void validateResponseOfGet(){
 		List<ResponseData> responseMap = 
